@@ -1,2 +1,6 @@
 Django
 djangorestframework
+celery
+redis
+drf_yasg
+psycopg2

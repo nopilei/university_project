@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis
+    networks:
+      - local
+    ports:
+      - "6379:6379"
+
+  web:
+    build:
+      dockerfile: deploy/Dockerfile
+      context: ..
+    volumes:
+      - ..:/project
+    depends_on:
+      - db
+    networks:
+      - local
+    ports:
+      - "8001:8001"
+    command: "./deploy/wait-for-postgres.sh"
+#    command: python manage.py runserver 0.0.0.0:8001
+
+  worker:
+    build:
+      dockerfile: deploy/Dockerfile
+      context: ..
+    volumes:
+      - ..:/project
+    networks:
+      - local
+    depends_on:
+      - redis
+      - web
+    command: python -m celery -A apps_config worker
+
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgres/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - local
+
+networks:
+  local:
+    driver: bridge

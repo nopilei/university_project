@@ -9,3 +9,8 @@ class Discipline(models.Model):
 class DisciplineCourse(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['course', 'discipline'], name='course_discipline_unique'),
+        ]
